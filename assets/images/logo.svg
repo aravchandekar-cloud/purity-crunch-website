@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48" role="img" aria-label="Purity Crunch">
+  <defs>
+    <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2D7D5F"/>
+      <stop offset="100%" style="stop-color:#1B4965"/>
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D4822A"/>
+      <stop offset="100%" style="stop-color:#1B4965"/>
+    </linearGradient>
+  </defs>
+  <!-- Leaf icon mark -->
+  <g transform="translate(2, 4)">
+    <path d="M18 0C18 0 32 4 32 20C32 28 26 34 18 36C10 34 4 28 4 20C4 4 18 0 18 0Z" fill="url(#leaf-grad)" opacity="0.9"/>
+    <path d="M18 8C18 8 18 28 18 36" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M18 14C22 12 26 14 28 18" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <path d="M18 20C14 18 10 20 8 24" stroke="white" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.5"/>
+  </g>
+  <!-- Brand name -->
+  <text x="44" y="22" font-family="'Outfit', sans-serif" font-weight="700" font-size="22" fill="#0D2137" letter-spacing="-0.5">PURITY</text>
+  <text x="134" y="22" font-family="'Outfit', sans-serif" font-weight="700" font-size="22" fill="#1B4965" letter-spacing="-0.5">CRUNCH</text>
+  <!-- Tagline -->
+  <text x="44" y="38" font-family="'Source Sans 3', sans-serif" font-weight="500" font-size="9.5" fill="#6B7B8D" letter-spacing="2.5">PREMIUM EXPORT QUALITY</text>
+  <!-- Accent line -->
+  <line x1="44" y1="26" x2="104" y2="26" stroke="url(#accent-grad)" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+</svg>
