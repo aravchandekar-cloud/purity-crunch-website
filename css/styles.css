@@ -1488,3 +1488,21 @@ body.cursor-hover-btn #cursor-ring { border-color: rgba(255,255,255,0.4); }
    --border: #EDE7DC;
    Fonts: Playfair Display (Headings), DM Sans (Sub/UI), Cabin (Body)
 ===== END OLD DESIGN TOKENS ===== */
+
+/* ── 3D WebGL background layer ─────────────────────────────────────── */
+/* Canvas sits above section backgrounds (z-1), content wrappers above it (z-2).
+   #hero-canvas keeps z-index:0 via its existing ID rule (higher specificity). */
+#webgl-bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+section > *,
+footer > *,
+header.hero > * {
+    position: relative;
+    z-index: 2;
+}
