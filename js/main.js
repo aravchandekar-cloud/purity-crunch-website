@@ -38,26 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ─── Scroll animations (Intersection Observer) ──────────────────────────
-    const initScrollAnimations = () => {
-        const elements = document.querySelectorAll('.fade-up, .fade-in-left, .fade-in-right');
-        if (prefersReducedMotion) {
-            elements.forEach(el => el.classList.add('visible'));
-            return;
-        }
-        const observer = new IntersectionObserver((entries, obs) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    obs.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-        elements.forEach(el => observer.observe(el));
-    };
-    initScrollAnimations();
-
     // ─── Active nav highlight ────────────────────────────────────────────────
     const sections = document.querySelectorAll('section[id], header[id]');
     const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]:not(.btn)');
@@ -73,51 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.4 });
     sections.forEach(s => sectionObserver.observe(s));
 
-    // ─── Counter animations ──────────────────────────────────────────────────
-    const initCounters = () => {
-        const counters = document.querySelectorAll('[data-count]');
-        if (!counters.length) return;
-
-        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-
-        const animateCounter = (el) => {
-            const target = parseInt(el.dataset.count, 10);
-            const suffix = el.dataset.suffix || '';
-            const duration = prefersReducedMotion ? 0 : 1400;
-            const start = performance.now();
-
-            const tick = (now) => {
-                const elapsed = now - start;
-                const progress = Math.min(elapsed / duration, 1);
-                const value = Math.round(easeOutCubic(progress) * target);
-                el.textContent = value + suffix;
-                if (progress < 1) requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-        };
-
-        const obs = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounter(entry.target);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        counters.forEach(el => obs.observe(el));
-    };
-    initCounters();
-
-    // ─── Product Modal ───────────────────────────────────────────────────────
+    // ─── Product Modal (GSAP) ────────────────────────────────────────────────
     const initProductModal = () => {
         const overlay = document.getElementById('product-modal-overlay');
+        const modal = overlay ? overlay.querySelector('.modal-container, .product-modal, [class*="modal"]:not(#product-modal-overlay)') : null;
         const modalImg = document.getElementById('modal-img');
         const modalTitle = document.getElementById('modal-title');
         const modalDesc = document.getElementById('modal-desc');
         const modalClose = document.getElementById('modal-close');
         const modalCta = document.getElementById('modal-cta');
         if (!overlay) return;
+
+        // Find the inner modal box (direct child of overlay that's not the overlay itself)
+        const modalBox = overlay.querySelector('.product-modal');
 
         const openModal = (btn) => {
             modalImg.src = btn.dataset.img || '';
@@ -126,12 +74,24 @@ document.addEventListener('DOMContentLoaded', () => {
             modalDesc.textContent = btn.dataset.desc || '';
             overlay.classList.add('open');
             document.body.style.overflow = 'hidden';
+            gsap.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
+            if (modalBox) {
+                gsap.fromTo(modalBox,
+                    { y: 28, scale: 0.95, autoAlpha: 0 },
+                    { y: 0, scale: 1, autoAlpha: 1, duration: 0.4, ease: "back.out(1.4)", delay: 0.05 }
+                );
+            }
             modalClose.focus();
         };
 
         const closeModal = () => {
-            overlay.classList.remove('open');
-            document.body.style.overflow = '';
+            if (modalBox) {
+                gsap.to(modalBox, { y: 18, scale: 0.97, autoAlpha: 0, duration: 0.25, ease: "power2.in" });
+            }
+            gsap.to(overlay, {
+                autoAlpha: 0, duration: 0.28, delay: 0.08, ease: "power2.in",
+                onComplete: () => { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+            });
         };
 
         document.querySelectorAll('.quick-view-btn').forEach(btn => {
@@ -140,8 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         modalClose.addEventListener('click', closeModal);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-        // Close modal and scroll to form when CTA clicked
         modalCta.addEventListener('click', closeModal);
 
         document.addEventListener('keydown', (e) => {
@@ -164,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     initVideoOverlay();
 
-    // ─── FAQ Accordion ───────────────────────────────────────────────────────
+    // ─── FAQ Accordion (GSAP) ────────────────────────────────────────────────
     const initAccordion = () => {
         document.querySelectorAll('.faq-question').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -172,39 +130,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 const answer = item.querySelector('.faq-answer');
                 const isOpen = item.classList.contains('open');
 
-                // Close all others
+                // Close all open items with GSAP
                 document.querySelectorAll('.faq-item.open').forEach(openItem => {
                     openItem.classList.remove('open');
-                    openItem.querySelector('.faq-answer').style.maxHeight = null;
                     openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                    gsap.to(openItem.querySelector('.faq-answer'), {
+                        height: 0, duration: 0.3, ease: "power2.in",
+                        onComplete: () => { openItem.querySelector('.faq-answer').style.overflow = 'hidden'; }
+                    });
                 });
 
                 if (!isOpen) {
                     item.classList.add('open');
-                    answer.style.maxHeight = answer.scrollHeight + 'px';
                     btn.setAttribute('aria-expanded', 'true');
+                    gsap.set(answer, { height: 'auto' });
+                    const fullHeight = answer.offsetHeight;
+                    gsap.fromTo(answer,
+                        { height: 0 },
+                        { height: fullHeight, duration: 0.42, ease: "power3.out",
+                          onComplete: () => { answer.style.height = 'auto'; } }
+                    );
                 }
             });
         });
     };
     initAccordion();
-
-    // ─── Process connecting line ─────────────────────────────────────────────
-    const initProcessLine = () => {
-        const steps = document.getElementById('process-steps');
-        if (!steps || prefersReducedMotion) {
-            if (steps) steps.classList.add('line-visible');
-            return;
-        }
-        const obs = new IntersectionObserver(([entry], observer) => {
-            if (entry.isIntersecting) {
-                steps.classList.add('line-visible');
-                observer.unobserve(steps);
-            }
-        }, { threshold: 0.3 });
-        obs.observe(steps);
-    };
-    initProcessLine();
 
     // ─── Form submission ─────────────────────────────────────────────────────
     const form = document.getElementById('inquiry-form');
