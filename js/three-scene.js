@@ -24,7 +24,7 @@ function init() {
         return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(window.innerWidth, window.innerHeight);
 
     const scene = new THREE.Scene();
@@ -95,8 +95,9 @@ function init() {
     const chips = []; // per-instance data, flat across all meshes
 
     VARIANTS.forEach((v) => {
-        const mat = new THREE.MeshStandardMaterial({
-            color: v.color, roughness: v.roughness, metalness: 0.05,
+        // Lambert: cheap lit shader (no per-pixel PBR), big win for fullscreen overdraw
+        const mat = new THREE.MeshLambertMaterial({
+            color: v.color,
             transparent: true, opacity: 0.95, vertexColors: v.vertexColors
         });
         const mesh = new THREE.InstancedMesh(v.geo, mat, PER);
@@ -172,10 +173,10 @@ function init() {
     const quat = new THREE.Quaternion();
     const pos = new THREE.Vector3();
     let running = true;
-    let rafId = 0;
 
+    // Driven by gsap.ticker (same loop as Lenis raf) — one rAF, render runs in phase
+    // with the scroll update instead of a competing second rAF loop.
     function tick() {
-        rafId = requestAnimationFrame(tick);
         if (!running) return;
         const t = clock.getElapsedTime();
 
@@ -214,7 +215,7 @@ function init() {
 
     canvas.addEventListener('webglcontextlost', (e) => {
         e.preventDefault();
-        cancelAnimationFrame(rafId);
+        gsap.ticker.remove(tick);
         canvas.style.display = 'none';
         const hero2d = document.getElementById('hero-canvas');
         if (hero2d) hero2d.style.display = '';
@@ -224,6 +225,6 @@ function init() {
     // success: hide the 2D particle hero, start loop
     const hero2d = document.getElementById('hero-canvas');
     if (hero2d) hero2d.style.display = 'none';
-    tick();
+    gsap.ticker.add(tick);
     console.log('[3D] WebGL chip scene initialized:', TOTAL, 'chips');
 }
