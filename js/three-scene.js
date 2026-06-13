@@ -57,7 +57,7 @@ function init() {
                 pos.setZ(i, z * rimWave);
             }
             // gentle potato-chip warp
-            pos.setY(i, y + 0.05 * Math.sin(ang * 3 + r * 4) * r);
+            pos.setY(i, y + 0.09 * Math.sin(ang * 3 + r * 4) * r);
         }
         geo.computeVertexNormals();
         return geo;
@@ -111,7 +111,7 @@ function init() {
                 base: new THREE.Vector3(
                     (Math.random() - 0.5) * 18,
                     (Math.random() - 0.5) * 10,
-                    (Math.random() - 0.5) * 8
+                    -8 + Math.random() * 9   // keep chips behind the content plane
                 ),
                 ring: new THREE.Vector3(
                     Math.cos(ringAng) * 8.5,
@@ -120,7 +120,7 @@ function init() {
                 ),
                 rotAxis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
                 rotSpeed: 0.15 + Math.random() * 0.35,
-                scale: 0.45 + Math.random() * 0.65,
+                scale: 0.3 + Math.random() * 0.45,
                 phase: Math.random() * Math.PI * 2
             });
         }
