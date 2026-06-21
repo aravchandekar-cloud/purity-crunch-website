@@ -20,21 +20,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelector('.nav-links');
 
     if (mobileMenuBtn && navLinks) {
+        const closeMobileMenu = () => {
+            navLinks.classList.remove('active');
+            mobileMenuBtn.classList.remove('open');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        };
         mobileMenuBtn.addEventListener('click', () => {
             const isOpen = navLinks.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('open', isOpen);
             mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            const icon = mobileMenuBtn.querySelector('i');
-            icon.classList.toggle('ph-list', !isOpen);
-            icon.classList.toggle('ph-x', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         });
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                const icon = mobileMenuBtn.querySelector('i');
-                icon.classList.add('ph-list');
-                icon.classList.remove('ph-x');
-            });
+        navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileMenu));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) closeMobileMenu();
         });
     }
 
@@ -155,6 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     initAccordion();
+
+    // ─── Reveal: IntersectionObserver scroll-entry ───────────────────────────
+    if (!prefersReducedMotion) {
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.10, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    } else {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+    }
 
     // ─── Form submission ─────────────────────────────────────────────────────
     const form = document.getElementById('inquiry-form');
