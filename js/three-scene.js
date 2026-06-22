@@ -172,7 +172,7 @@ function init() {
     const clock = new THREE.Clock();
     const quat = new THREE.Quaternion();
     const pos = new THREE.Vector3();
-    let running = true;
+    let running = true, prevOpacity = -1;
 
     // Driven by gsap.ticker (same loop as Lenis raf) — one rAF, render runs in phase
     // with the scroll update instead of a competing second rAF loop.
@@ -190,10 +190,11 @@ function init() {
             dummy.updateMatrix();
             c.mesh.setMatrixAt(c.index, dummy.matrix);
         }
-        meshes.forEach((m) => {
-            m.instanceMatrix.needsUpdate = true;
-            m.material.opacity = state.opacity;
-        });
+        meshes.forEach((m) => { m.instanceMatrix.needsUpdate = true; });
+        if (state.opacity !== prevOpacity) {
+            meshes.forEach((m) => { m.material.opacity = state.opacity; });
+            prevOpacity = state.opacity;
+        }
 
         camera.position.x += (mouse.x * 1.2 - camera.position.x) * 0.04;
         camera.position.y += (state.camY - mouse.y * 0.8 - camera.position.y) * 0.04;
@@ -203,10 +204,14 @@ function init() {
     }
 
     // ── Lifecycle ──────────────────────────────────────────────────────
+    let resizeTimer;
     window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }, 150);
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -215,14 +220,19 @@ function init() {
 
     canvas.addEventListener('webglcontextlost', (e) => {
         e.preventDefault();
+        running = false;
         gsap.ticker.remove(tick);
+        meshes.forEach((m) => { m.material.dispose(); m.geometry.dispose(); });
+        chipGeo.dispose();
+        renderer.dispose();
         canvas.style.display = 'none';
         const hero2d = document.getElementById('hero-canvas');
         if (hero2d) hero2d.style.display = '';
         console.warn('[3D] WebGL context lost — reverted to 2D hero.');
     });
 
-    // success: hide the 2D particle hero, start loop
+    // success: stop 2D particle rAF loop, hide canvas, start 3D loop
+    window.__particleHeroStop?.();
     const hero2d = document.getElementById('hero-canvas');
     if (hero2d) hero2d.style.display = 'none';
     gsap.ticker.add(tick);

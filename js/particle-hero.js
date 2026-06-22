@@ -14,7 +14,7 @@
         'rgba(27, 73, 101, 0.35)',
     ];
     const COUNT = 80;
-    let W, H, particles = [], mx = -999, my = -999;
+    let W, H, particles = [], mx = -999, my = -999, active = true, rafId = null;
     const R = 90; // mouse repulsion radius
 
     const resize = () => {
@@ -32,6 +32,7 @@
     });
 
     const tick = () => {
+        if (!active) return;
         ctx.clearRect(0, 0, W, H);
         particles.forEach(p => {
             const dx = p.x - mx, dy = p.y - my;
@@ -53,7 +54,7 @@
             ctx.fillStyle = p.color;
             ctx.fill();
         });
-        requestAnimationFrame(tick);
+        rafId = requestAnimationFrame(tick);
     };
 
     document.addEventListener('mousemove', e => {
@@ -63,6 +64,7 @@
     });
     document.addEventListener('mouseleave', () => { mx = -999; my = -999; });
     window.addEventListener('resize', resize);
+    window.__particleHeroStop = () => { active = false; cancelAnimationFrame(rafId); };
 
     resize();
     particles = Array.from({ length: COUNT }, mkp);
