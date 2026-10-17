@@ -7,16 +7,27 @@
     <title>Purity Crunch | Premium Export Quality Banana Chips</title>
     <meta name="description"
         content="Authentic Traditional Indian Snacks, Direct from Bhusawal. Premium handmade banana chips crafted with unique traditional spice blends. Global export-ready.">
+    <!-- Progressive enhancement: html.js gates every hidden-until-animated rule.
+         If the animation bootstrap has not set html.anim-ready within 3 s, html.anim-failed forces everything visible. -->
+    <script>
+        (function (d) {
+            var r = d.documentElement;
+            r.classList.add('js');
+            setTimeout(function () {
+                if (!r.classList.contains('anim-ready')) r.classList.add('anim-failed');
+            }, 3000);
+        })(document);
+    </script>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton:wght@400&family=Outfit:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
-    <script src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1"></script>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script type="importmap">
     { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
     </script>
@@ -28,7 +39,7 @@
     <div id="cursor-ring" aria-hidden="true"><span id="cursor-text"></span></div>
     <div id="scroll-progress" aria-hidden="true"></div>
     <!-- Skip to main content (accessibility) -->
-    <a href="#home" class="skip-link">Skip to main content</a>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
     <!-- Navbar -->
     <nav class="navbar">
@@ -54,10 +65,11 @@
         </div>
     </nav>
 
+    <main id="main" tabindex="-1">
     <!-- Hero Section -->
     <header id="home" class="hero">
         <canvas id="hero-canvas" aria-hidden="true"></canvas>
-        <div class="hero-bg" style="background-image: url('assets/images/hero_banana_farm_1774173563630.png');"></div>
+        <div class="hero-bg"></div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <span class="badge">Export Quality from India</span>
@@ -128,6 +140,7 @@
                     </div>
                 </div>
             </div>
+            <!-- PLACEHOLDER: needs real content from owner -->
             <div class="trust-card fade-up delay-3">
                 <div class="trust-card-inner">
                     <div class="trust-card-front">
@@ -161,8 +174,11 @@
                 <div class="dbl-shell reveal">
                 <div class="dbl-core product-card">
                     <div class="product-image">
-                        <img src="assets/images/classic_chips_product_1773326766268.png"
-                            alt="Classic Salted Banana Chips" width="640" height="350" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/classic_chips_product_1773326766268.webp" type="image/webp">
+                            <img src="assets/images/classic_chips_product_1773326766268.png"
+                                alt="Classic Salted Banana Chips" width="640" height="640" loading="lazy">
+                        </picture>
                         <div class="product-tags"><span class="tag">Bestseller</span></div>
                         <button class="quick-view-btn"
                             data-name="Classic Salted"
@@ -194,8 +210,11 @@
                 <div class="dbl-shell reveal reveal-d1">
                 <div class="dbl-core product-card">
                     <div class="product-image">
-                        <img src="assets/images/spicy_masala_chips_1773326798452.png"
-                            alt="Traditional Masala Banana Chips" width="640" height="350" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/spicy_masala_chips_1773326798452.webp" type="image/webp">
+                            <img src="assets/images/spicy_masala_chips_1773326798452.png"
+                                alt="Traditional Masala Banana Chips" width="640" height="640" loading="lazy">
+                        </picture>
                         <button class="quick-view-btn"
                             data-name="Traditional Masala &amp; Spicy Chili"
                             data-desc="Generously dusted in our closely guarded, traditional Indian spice blends. A perfect balance of heat and flavor in every bite. A must-have for spice lovers."
@@ -225,8 +244,11 @@
                 <div class="dbl-shell reveal reveal-d2">
                 <div class="dbl-core product-card">
                     <div class="product-image">
-                        <img src="assets/images/sweet_jaggery_chips_1774091368044.png"
-                            alt="Sweet Jaggery Banana Chips" width="640" height="350" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/sweet_jaggery_chips_1774091368044.webp" type="image/webp">
+                            <img src="assets/images/sweet_jaggery_chips_1774091368044.png"
+                                alt="Sweet Jaggery Banana Chips" width="640" height="640" loading="lazy">
+                        </picture>
                         <button class="quick-view-btn"
                             data-name="Sweet Jaggery Coated"
                             data-desc="Dipped in pure, natural sugarcane jaggery for a delightful sweet crunch. A traditional Maharashtrian favorite with absolutely no refined sugar."
@@ -256,8 +278,11 @@
                 <div class="dbl-shell reveal reveal-d3">
                 <div class="dbl-core product-card">
                     <div class="product-image">
-                        <img src="assets/images/black_pepper_chips_1774091393380.png"
-                            alt="Zesty Black Pepper Chips" width="640" height="350" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/black_pepper_chips_1774091393380.webp" type="image/webp">
+                            <img src="assets/images/black_pepper_chips_1774091393380.png"
+                                alt="Zesty Black Pepper Chips" width="640" height="640" loading="lazy">
+                        </picture>
                         <button class="quick-view-btn"
                             data-name="Zesty Black Pepper"
                             data-desc="Crinkle-cut chips dusted with freshly cracked black pepper and rock salt. A savory, mildly spicy kick that pairs perfectly with tea or coffee."
@@ -287,9 +312,12 @@
 
     <!-- Product Quick View Modal -->
     <div class="product-modal-overlay" id="product-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div class="product-modal">
+        <div class="product-modal" data-lenis-prevent>
             <div class="modal-image">
-                <img src="" alt="" id="modal-img">
+                <picture>
+                    <source type="image/webp" id="modal-img-webp">
+                    <img alt="" id="modal-img" width="640" height="640">
+                </picture>
             </div>
             <div class="modal-content">
                 <button class="modal-close" id="modal-close" aria-label="Close product details">
@@ -364,8 +392,11 @@
                     </div>
                     <div class="image-frame-outer">
                         <div class="image-frame">
-                            <img src="assets/images/traditional_spice_dusting_1774173580779.png"
-                                alt="Traditional Indian Spice Dusting Process" width="620" height="520" loading="lazy">
+                            <picture>
+                                <source srcset="assets/images/traditional_spice_dusting_1774173580779.webp" type="image/webp">
+                                <img src="assets/images/traditional_spice_dusting_1774173580779.png"
+                                    alt="Traditional Indian Spice Dusting Process" width="640" height="640" loading="lazy">
+                            </picture>
                         </div>
                     </div>
                     <div class="experience-badge">
@@ -419,7 +450,10 @@
                 <div class="process-step fade-up">
                     <span class="process-step-number" aria-hidden="true">1</span>
                     <div class="process-step-img">
-                        <img src="assets/images/process_farm_fresh.png" alt="Fresh bananas harvested from Bhusawal plantations" width="400" height="240" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/process_farm_fresh.webp" type="image/webp">
+                            <img src="assets/images/process_farm_fresh.png" alt="Fresh bananas harvested from Bhusawal plantations" width="800" height="800" loading="lazy">
+                        </picture>
                     </div>
                     <div class="process-step-icon">
                         <i class="ph ph-plant" aria-hidden="true"></i>
@@ -430,7 +464,10 @@
                 <div class="process-step fade-up delay-1">
                     <span class="process-step-number" aria-hidden="true">2</span>
                     <div class="process-step-img">
-                        <img src="assets/images/process_hand_slice.png" alt="Artisan hand slicing bananas into uniform chips" width="400" height="240" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/process_hand_slice.webp" type="image/webp">
+                            <img src="assets/images/process_hand_slice.png" alt="Artisan hand slicing bananas into uniform chips" width="800" height="800" loading="lazy">
+                        </picture>
                     </div>
                     <div class="process-step-icon">
                         <i class="ph ph-knife" aria-hidden="true"></i>
@@ -441,7 +478,10 @@
                 <div class="process-step fade-up delay-2">
                     <span class="process-step-number" aria-hidden="true">3</span>
                     <div class="process-step-img">
-                        <img src="assets/images/process_spice_fry.png" alt="Banana chips frying in kadai with traditional spices" width="400" height="240" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/process_spice_fry.webp" type="image/webp">
+                            <img src="assets/images/process_spice_fry.png" alt="Banana chips frying in kadai with traditional spices" width="800" height="800" loading="lazy">
+                        </picture>
                     </div>
                     <div class="process-step-icon">
                         <i class="ph ph-fire" aria-hidden="true"></i>
@@ -452,7 +492,10 @@
                 <div class="process-step fade-up delay-3">
                     <span class="process-step-number" aria-hidden="true">4</span>
                     <div class="process-step-img">
-                        <img src="assets/images/process_pack_export.png" alt="Premium export boxes being packed for global shipping" width="400" height="240" loading="lazy">
+                        <picture>
+                            <source srcset="assets/images/process_pack_export.webp" type="image/webp">
+                            <img src="assets/images/process_pack_export.png" alt="Premium export boxes being packed for global shipping" width="800" height="800" loading="lazy">
+                        </picture>
                     </div>
                     <div class="process-step-icon">
                         <i class="ph ph-package" aria-hidden="true"></i>
@@ -474,6 +517,7 @@
             </div>
 
             <div class="testimonials-grid">
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 1 -->
                 <div class="testimonial-card fade-up">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -494,6 +538,7 @@
                     </div>
                 </div>
 
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 2 -->
                 <div class="testimonial-card fade-up delay-1">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -514,6 +559,7 @@
                     </div>
                 </div>
 
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 3 -->
                 <div class="testimonial-card fade-up delay-2">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -534,6 +580,7 @@
                     </div>
                 </div>
 
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 4 -->
                 <div class="testimonial-card fade-up delay-3">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -554,6 +601,7 @@
                     </div>
                 </div>
 
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 5 -->
                 <div class="testimonial-card fade-up delay-4">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -574,6 +622,7 @@
                     </div>
                 </div>
 
+                <!-- PLACEHOLDER: needs real content from owner -->
                 <!-- Testimonial 6 -->
                 <div class="testimonial-card fade-up delay-4">
                     <div class="testimonial-stars" aria-hidden="true">
@@ -670,11 +719,15 @@
                     <span class="eyebrow-tag">Global Distribution</span>
                     <h2>Partner with Purity Crunch</h2>
                     <p>We are actively seeking international distributors, supermarket chains, and wholesale buyers. With a robust 500kg daily production capacity, we handle large, recurring global orders in premium corrugated export boxes.</p>
+                    <!-- PLACEHOLDER: needs real content from owner -->
                     <p class="micro-copy">Join 50+ international buyers who trust Purity Crunch</p>
 
                     <ul class="trust-signals" role="list">
+                        <!-- PLACEHOLDER: needs real content from owner -->
                         <li class="trust-signal-item"><i class="ph ph-clock" aria-hidden="true"></i> Response within 24 hours</li>
+                        <!-- PLACEHOLDER: needs real content from owner -->
                         <li class="trust-signal-item"><i class="ph ph-handshake" aria-hidden="true"></i> No commitment required</li>
+                        <!-- PLACEHOLDER: needs real content from owner -->
                         <li class="trust-signal-item"><i class="ph ph-package" aria-hidden="true"></i> Free samples for qualified buyers</li>
                     </ul>
 
@@ -763,13 +816,17 @@
 
                 <!-- Image on right -->
                 <div class="split-image export-image-wrap fade-in-right">
-                    <img src="assets/images/premium_export_boxes_1774173595864.png"
-                        alt="Premium Export Packaging Boxes" width="620" height="520" loading="lazy">
+                    <picture>
+                        <source srcset="assets/images/premium_export_boxes_1774173595864.webp" type="image/webp">
+                        <img src="assets/images/premium_export_boxes_1774173595864.png"
+                            alt="Premium Export Packaging Boxes" width="640" height="640" loading="lazy">
+                    </picture>
                     <div class="export-ready-badge">Export Ready</div>
                 </div>
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -796,12 +853,14 @@
                     <h3>Contact Us</h3>
                     <p><i class="ph-fill ph-map-pin" aria-hidden="true"></i> Plot No. 14, Varangaon Road,<br>Bhusawal, Maharashtra, India</p>
                     <p><i class="ph-fill ph-envelope" aria-hidden="true"></i> export@puritycrunch.com</p>
+                    <!-- PLACEHOLDER: needs real content from owner -->
                     <p><i class="ph-fill ph-phone" aria-hidden="true"></i> +91 98765 43210</p>
                 </div>
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 Purity Crunch. All rights reserved.</p>
                 <div class="legal-links">
+                    <!-- PLACEHOLDER: needs real content from owner -->
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Trade</a>
                     <a href="#">Shipping Documentation</a>
@@ -810,11 +869,11 @@
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
-    <script src="js/smooth-scroll.js"></script>
-    <script src="js/cursor.js"></script>
-    <script src="js/particle-hero.js"></script>
-    <script src="js/gsap-animations.js"></script>
+    <script defer src="js/main.js"></script>
+    <script defer src="js/smooth-scroll.js"></script>
+    <script defer src="js/cursor.js"></script>
+    <script defer src="js/particle-hero.js"></script>
+    <script defer src="js/gsap-animations.js"></script>
     <script type="module" src="js/three-scene.js"></script>
 </body>
 

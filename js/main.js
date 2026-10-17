@@ -25,12 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenuBtn.classList.remove('open');
             mobileMenuBtn.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            window.lenisInstance?.start();
         };
         mobileMenuBtn.addEventListener('click', () => {
             const isOpen = navLinks.classList.toggle('active');
             mobileMenuBtn.classList.toggle('open', isOpen);
             mobileMenuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             document.body.style.overflow = isOpen ? 'hidden' : '';
+            if (isOpen) window.lenisInstance?.stop(); else window.lenisInstance?.start();
         });
         navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileMenu));
         document.addEventListener('keydown', (e) => {
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('product-modal-overlay');
         const modal = overlay ? overlay.querySelector('.modal-container, .product-modal, [class*="modal"]:not(#product-modal-overlay)') : null;
         const modalImg = document.getElementById('modal-img');
+        const modalImgWebp = document.getElementById('modal-img-webp');
         const modalTitle = document.getElementById('modal-title');
         const modalDesc = document.getElementById('modal-desc');
         const modalClose = document.getElementById('modal-close');
@@ -68,23 +71,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const modalBox = overlay.querySelector('.product-modal');
 
         const openModal = (btn) => {
-            modalImg.src = btn.dataset.img || '';
+            const img = btn.dataset.img || '';
+            // the <img> keeps the original file; the <picture> source points at its .webp sibling
+            if (modalImgWebp) modalImgWebp.srcset = img.replace(/\.png$/i, '.webp');
+            modalImg.src = img;
             modalImg.alt = btn.dataset.name || '';
             modalTitle.textContent = btn.dataset.name || '';
             modalDesc.textContent = btn.dataset.desc || '';
             overlay.classList.add('open');
             document.body.style.overflow = 'hidden';
-            gsap.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
-            if (modalBox) {
-                gsap.fromTo(modalBox,
-                    { y: 28, scale: 0.95, autoAlpha: 0 },
-                    { y: 0, scale: 1, autoAlpha: 1, duration: 0.4, ease: "back.out(1.4)", delay: 0.05 }
-                );
+            window.lenisInstance?.stop();
+            if (window.gsap) {
+                gsap.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
+                if (modalBox) {
+                    gsap.fromTo(modalBox,
+                        { y: 28, scale: 0.95, autoAlpha: 0 },
+                        { y: 0, scale: 1, autoAlpha: 1, duration: 0.4, ease: "back.out(1.4)", delay: 0.05 }
+                    );
+                }
             }
             modalClose.focus();
         };
 
         const closeModal = () => {
+            // start Lenis straight away so a CTA's anchor scroll (modal-cta) isn't swallowed by the fade-out
+            window.lenisInstance?.start();
+            if (!window.gsap) {
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+                return;
+            }
             if (modalBox) {
                 gsap.to(modalBox, { y: 18, scale: 0.97, autoAlpha: 0, duration: 0.25, ease: "power2.in" });
             }
@@ -134,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.faq-item.open').forEach(openItem => {
                     openItem.classList.remove('open');
                     openItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+                    if (!window.gsap) { openItem.querySelector('.faq-answer').style.height = '0px'; return; }   // GSAP CDN blocked
                     gsap.to(openItem.querySelector('.faq-answer'), {
                         height: 0, duration: 0.3, ease: "power2.in",
                         onComplete: () => { openItem.querySelector('.faq-answer').style.overflow = 'hidden'; }
@@ -143,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isOpen) {
                     item.classList.add('open');
                     btn.setAttribute('aria-expanded', 'true');
+                    if (!window.gsap) { answer.style.height = 'auto'; return; }
                     gsap.set(answer, { height: 'auto' });
                     const fullHeight = answer.offsetHeight;
                     gsap.fromTo(answer,

@@ -2,8 +2,29 @@
  * Purity Crunch — GSAP Ultra Animations v2
  * Requires: gsap.min.js + ScrollTrigger.min.js + smooth-scroll.js loaded before this
  */
+(function () {
+// GSAP / ScrollTrigger CDN blocked → leave every section as authored (html.anim-failed forces any CSS-hidden state visible)
+if (!window.gsap || !window.ScrollTrigger) {
+    document.documentElement.classList.add('anim-failed');
+    return;
+}
+
 gsap.registerPlugin(ScrollTrigger);
 gsap.defaults({ ease: 'power3.out' });
+
+// H1 .word-reveal → .char split. Runs in every mode so the markup (and its a11y label) always exists;
+// the hidden starting states below are only applied when motion is allowed.
+function splitHeadline() {
+    const h1 = document.querySelector('.hero h1');
+    if (h1) h1.setAttribute('aria-label', h1.textContent.replace(/\s+/g, ' ').trim());
+    document.querySelectorAll('.word-reveal').forEach(span => {
+        span.innerHTML = [...span.textContent].map(c =>
+            c === ' '
+                ? '<span class="char char-space" aria-hidden="true" style="display:inline-block;white-space:pre"> </span>'
+                : `<span class="char" aria-hidden="true" style="display:inline-block">${c}</span>`
+        ).join('');
+    });
+}
 
 const mm = gsap.matchMedia();
 
@@ -14,6 +35,10 @@ mm.add(
   },
   (ctx) => {
     const { hasMotion } = ctx.conditions;
+
+    splitHeadline();
+    // Reduced motion: no starting states, no tweens, no loops — the page is simply in its final state
+    if (!hasMotion) return;
 
     // ── 1. HERO ───────────────────────────────────────────────────────
 
@@ -26,14 +51,8 @@ mm.add(
     gsap.set('.hero-buttons .btn',  { y: 20,  autoAlpha: 0 });
     gsap.set('.scroll-indicator',   { autoAlpha: 0 });
 
-    // Char-by-char split on .word-reveal spans
+    // Char starting states (the split itself already ran above)
     document.querySelectorAll('.word-reveal').forEach(span => {
-        const text = span.textContent;
-        span.innerHTML = text.split('').map(c =>
-            c === ' '
-                ? '<span class="char char-space" style="display:inline-block;white-space:pre"> </span>'
-                : `<span class="char" style="display:inline-block">${c}</span>`
-        ).join('');
         // Reset parent clip-path so it doesn't interfere
         gsap.set(span, { clipPath: 'none', autoAlpha: 1 });
         gsap.set(span.querySelectorAll('.char:not(.char-space)'), { clipPath: 'inset(0 105% 0 0)', autoAlpha: 0 });
@@ -299,3 +318,7 @@ mm.add(
     return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
   }
 );
+
+// Bootstrap finished — cancels the 3 s watchdog in <head> (which would add html.anim-failed)
+document.documentElement.classList.add('anim-ready');
+})();

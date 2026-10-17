@@ -19,6 +19,25 @@
     --text-main: #1A2332;
     --text-muted: #6B7B8D;
     --border: #DDE3EC;
+    --accent-rgb: 212 130 42;   /* #D4822A channels — use as rgb(var(--accent-rgb) / .25) */
+    --primary-rgb: 27 73 101;   /* #1B4965 channels */
+
+    /* Type + rhythm (rem + vw clamps — never a vw-only root size, so user text scaling keeps working) */
+    --font-display: "Anton", "Outfit", sans-serif;
+    --fs-wordmark: clamp(5.75rem, 24vw, 30rem);
+    --fs-display: clamp(3.5rem, 8vw, 7.5rem);
+    --fs-h1: clamp(2.75rem, 5.2vw, 5rem);
+    --fs-h2: clamp(2rem, 3.4vw, 3.25rem);
+    --fs-h3: clamp(1.25rem, 1.8vw, 1.75rem);
+    --fs-lead: clamp(1.0625rem, 1.4vw, 1.375rem);
+    --gutter: clamp(1rem, 3.5vw, 2.5rem);
+    --section: clamp(5rem, 9vw, 9rem);
+
+    /* Motion durations */
+    --dur-1: .2s;
+    --dur-2: .35s;
+    --dur-3: .6s;
+    --dur-4: .9s;
 
     --radius-sm: 8px;
     --radius-md: 16px;
@@ -39,7 +58,9 @@
 
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* No CSS smooth-scroll: Lenis owns smooth scrolling. scroll-padding-top is the navbar offset
+   (native anchor fallback without Lenis, and the value the Lenis anchor router reads). */
+html { scroll-padding-top: 5rem; }
 body {
     font-family: 'Source Sans 3', sans-serif;
     color: var(--text-main);
@@ -48,6 +69,14 @@ body {
     overflow-x: hidden;
 }
 img, video { max-width: 100%; display: block; }
+picture { display: contents; }   /* <picture> wrappers must not change the img's box */
+
+/* Lenis (recommended CSS, lenis@1.1.18/dist/lenis.css) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: clip; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
 
 /* ===== TYPOGRAPHY ===== */
 h1, h2, h3, h4, h5, h6 {
@@ -289,21 +318,33 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 .hero-bg {
     position: absolute;
     inset: 0;
+    background-image: url("../assets/images/hero_banana_farm_1774173563630.png");
+    background-image: image-set(url("../assets/images/hero_banana_farm_1774173563630.webp") type("image/webp"),
+                                url("../assets/images/hero_banana_farm_1774173563630.png") type("image/png"));
     background-size: cover;
     background-position: center;
     z-index: -2;
     will-change: transform;
 }
 
-/* ── GSAP initial states (set before GSAP loads to prevent flash) ── */
-.hero .badge,
-.hero p { opacity: 0; }
-
-.word-reveal { clip-path: inset(0 100% 0 0); opacity: 0; }
-
-.scroll-indicator { opacity: 0; }
-
-.fade-up, .fade-in-left, .fade-in-right { /* opacity controlled by GSAP */ }
+/* ── Hidden-until-animated states ──
+   Only with JS (html.js), only when motion is allowed, and never once html.anim-failed is set
+   (the head script adds it if the animation bootstrap hasn't set html.anim-ready within 3 s).
+   JS off / GSAP CDN blocked / reduced motion → none of these apply, everything is visible. */
+@media (prefers-reduced-motion: no-preference) {
+    html.js:not(.anim-failed) .hero .badge,
+    html.js:not(.anim-failed) .hero p,
+    html.js:not(.anim-failed) .scroll-indicator { opacity: 0; }
+    html.js:not(.anim-failed) .word-reveal { clip-path: inset(0 100% 0 0); opacity: 0; }
+}
+/* Failsafe for states GSAP writes inline (gsap.from / gsap.set) — keep in sync with gsap-animations.js */
+html.anim-failed :is(
+    .hero .badge, .hero p, .hero-buttons .btn, .scroll-indicator, .word-reveal, .word-reveal .char,
+    .trust-card, .section-header, .faq-list, .faq-item, .product-card, .video-card,
+    .image-frame-outer, .location-bubble, .heritage-section .split-content > *, .feature-list li,
+    .process-step, .process-step-icon, .testimonial-card, .export-section .split-content > *,
+    .form-group, .export-image-wrap, .export-ready-badge, .footer-top > *
+) { opacity: 1 !important; visibility: visible !important; transform: none !important; clip-path: none !important; }
 
 .hero-overlay {
     position: absolute;
@@ -331,7 +372,6 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     font-weight: 500;
     letter-spacing: 0.5px;
     margin-bottom: 28px;
-    opacity: 0;
 }
 .hero .badge::before {
     content: '';
@@ -348,10 +388,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     max-width: 860px;
 }
 /* Word-by-word reveal */
-.word-reveal {
-    display: inline-block;
-    clip-path: inset(0 100% 0 0);
-}
+.word-reveal { display: inline-block; }
 .word-reveal:nth-child(1) { animation-delay: 0.22s; }
 .word-reveal:nth-child(2) { animation-delay: 0.38s; }
 .word-reveal:nth-child(3) { animation-delay: 0.54s; }
@@ -362,7 +399,6 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     max-width: 580px;
     margin-bottom: 44px;
     line-height: 1.72;
-    opacity: 0;
 }
 .hero-buttons {
     display: flex;
@@ -748,7 +784,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     z-index: 1;
 }
 .image-frame:hover { transform: rotate(0deg); }
-.image-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-frame img { width: 100%; height: 100%; aspect-ratio: 31 / 26; object-fit: cover; display: block; }
 
 /* Floating location bubble */
 .location-bubble {
@@ -809,7 +845,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    display: inline;
+    display: block;   /* was inline — an inline h2 shared a line box with the .eyebrow-tag above it */
 }
 .lead-text {
     font-size: 1.15rem;
@@ -991,7 +1027,8 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 .faq-item.open .faq-question { border-left-color: var(--primary); color: var(--primary-accessible); }
 .faq-chevron { flex-shrink: 0; font-size: 20px; color: var(--text-muted); transition: transform 0.35s var(--ease-expo), color 0.3s ease; }
 .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--primary); }
-.faq-answer { height: 0; overflow: hidden; }
+.faq-answer { overflow: hidden; }
+html.js .faq-answer { height: 0; }   /* collapsed only when JS is there to open it */
 .faq-answer-inner {
     padding: 0 24px 22px 27px;
     color: var(--text-muted);
@@ -999,6 +1036,53 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
     font-size: 0.97rem;
     border-left: 3px solid var(--primary);
 }
+
+/* ── FAQ page (faq.html — native <details> accordion, no JS) ── */
+.faq-page-title { font-size: 3rem; margin-bottom: 20px; line-height: 1.15; }
+details.faq-accordion {
+    background: var(--bg-color);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+details.faq-accordion[open] { border-color: var(--primary); box-shadow: 0 4px 18px rgba(27,73,101,0.09); }
+details.faq-accordion summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 24px;
+    cursor: pointer;
+    list-style: none;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--secondary);
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s ease, color 0.3s ease;
+}
+details.faq-accordion summary::-webkit-details-marker { display: none; }
+details.faq-accordion summary::after {
+    content: '';
+    flex-shrink: 0;
+    width: 9px; height: 9px;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.35s var(--ease-expo), border-color 0.3s ease;
+}
+details.faq-accordion[open] summary { border-left-color: var(--primary); color: var(--primary-accessible); }
+details.faq-accordion[open] summary::after { transform: rotate(-135deg) translateY(-2px); border-color: var(--primary); }
+details.faq-accordion summary:focus-visible { outline-offset: -3px; }   /* details clips overflow */
+.faq-accordion-answer {
+    padding: 0 24px 22px 27px;
+    color: var(--text-muted);
+    line-height: 1.72;
+    font-size: 0.97rem;
+    border-left: 3px solid var(--primary);
+}
+@media (max-width: 768px) { .faq-page-title { font-size: 2.2rem; } }
 
 /* ===== EXPORT SECTION (Dark Glass) ===== */
 .export-section {
@@ -1080,6 +1164,7 @@ a { text-decoration: none; color: inherit; transition: var(--transition); }
 .export-image-wrap img {
     border-radius: var(--radius-lg);
     width: 100%;
+    aspect-ratio: 31 / 26;
     object-fit: cover;
     box-shadow: 0 28px 56px rgba(0,0,0,0.45);
 }
@@ -1299,10 +1384,7 @@ input[type="tel"]:not(:placeholder-shown):invalid {
     }
     .fade-up, .fade-in-left, .fade-in-right { transform: none; }
     .hero-bg { animation: none; }
-    .word-reveal { clip-path: none !important; animation: none !important; opacity: 1 !important; }
-    .hero .badge, .hero p, .hero-buttons { opacity: 1 !important; animation: none !important; }
     .experience-badge { animation: none; }
-    html { scroll-behavior: auto; }
 }
 
 /* ── Process line fill (GSAP-animated, replaces ::before pseudo) ── */
@@ -1331,15 +1413,19 @@ input[type="tel"]:not(:placeholder-shown):invalid {
 /* ── Product card 3D tilt ── */
 .product-card { transform-style: preserve-3d; will-change: transform; }
 
-/* ===== CUSTOM CURSOR ===== */
-@media (pointer: fine) {
-    body { cursor: none; }
-    a, button, [data-magnetic], .product-card { cursor: none; }
-}
+/* ===== CUSTOM CURSOR =====
+   The native cursor is only hidden once js/cursor.js has really initialised
+   (fine pointer + no reduced motion) and set html.has-custom-cursor. */
+html.has-custom-cursor body,
+html.has-custom-cursor a,
+html.has-custom-cursor button,
+html.has-custom-cursor [data-magnetic],
+html.has-custom-cursor .product-card { cursor: none; }
+#cursor-dot, #cursor-ring { display: none; }   /* no stray dot when the custom cursor never starts */
 #cursor-dot {
     position: fixed; top: 0; left: 0;
     width: 5px; height: 5px;
-    background: var(--accent, #D4821A);
+    background: var(--accent);
     border-radius: 50%;
     pointer-events: none; z-index: 9999;
     transform: translate(-50%, -50%);
@@ -1348,14 +1434,16 @@ input[type="tel"]:not(:placeholder-shown):invalid {
 #cursor-ring {
     position: fixed; top: 0; left: 0;
     width: 44px; height: 44px;
-    background: rgba(212, 130, 42, 0.07);
-    border: 1px solid rgba(212, 130, 42, 0.25);
+    background: rgb(var(--accent-rgb) / 0.07);
+    border: 1px solid rgb(var(--accent-rgb) / 0.25);
     border-radius: 50%;
     pointer-events: none; z-index: 9998;
     transform: translate(-50%, -50%);
-    display: flex; align-items: center; justify-content: center;
+    align-items: center; justify-content: center;
     will-change: transform;
 }
+html.has-custom-cursor #cursor-dot { display: block; }
+html.has-custom-cursor #cursor-ring { display: flex; }
 #cursor-text {
     font-family: 'Outfit', sans-serif;
     font-size: 0.6rem; font-weight: 700;
@@ -1638,15 +1726,19 @@ footer > * {
 
 /* ── Scroll reveal (IntersectionObserver) ── */
 .reveal {
-    opacity: 0;
-    transform: translateY(52px);
-    filter: blur(6px);
     transition:
         opacity   0.85s cubic-bezier(0.32,0.72,0,1),
         transform 0.85s cubic-bezier(0.32,0.72,0,1),
         filter    0.65s cubic-bezier(0.32,0.72,0,1);
 }
-.reveal.is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+/* hidden until main.js adds .is-visible — only with JS, only with motion, never after anim-failed */
+@media (prefers-reduced-motion: no-preference) {
+    html.js:not(.anim-failed) .reveal:not(.is-visible) {
+        opacity: 0;
+        transform: translateY(52px);
+        filter: blur(6px);
+    }
+}
 .reveal-d1 { transition-delay: 0.08s; }
 .reveal-d2 { transition-delay: 0.16s; }
 .reveal-d3 { transition-delay: 0.24s; }
@@ -1666,7 +1758,20 @@ footer > * {
     .dbl-core  { border-radius: calc(1.5rem - 5px); }
 }
 
-/* ── Reduced motion: kill reveal blur ── */
-@media (prefers-reduced-motion: reduce) {
-    .reveal { transition: none; filter: none; }
+/* ── No-JS fallbacks (html:not(.js)) ── */
+html:not(.js) .video-poster-overlay { display: none; }   /* native <video controls> stay reachable */
+@media (max-width: 768px) {
+    html:not(.js) .navbar { border-radius: 28px; }
+    html:not(.js) .nav-container { flex-wrap: wrap; justify-content: center; gap: 4px; }
+    html:not(.js) .mobile-menu-btn { display: none; }
+    html:not(.js) .nav-links {
+        position: static; flex-direction: row; flex-wrap: wrap; justify-content: center;
+        gap: 2px 16px; padding: 0 0 4px; background: none;
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        opacity: 1; pointer-events: auto; transform: none;
+    }
+    html:not(.js) .nav-links a:not(.btn) {
+        font-size: 0.95rem !important; font-weight: 500 !important;
+        opacity: 1; transform: none; padding: 4px 0;
+    }
 }

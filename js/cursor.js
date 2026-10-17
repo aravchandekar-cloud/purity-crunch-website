@@ -9,7 +9,12 @@
     const dot  = document.getElementById('cursor-dot');
     const ring = document.getElementById('cursor-ring');
     const cursorText = document.getElementById('cursor-text');
-    if (!dot || !ring) return;
+    if (!dot || !ring || !window.gsap) return;
+
+    // Colours come from the CSS tokens (--accent-rgb / --primary-rgb), not hard-coded literals
+    const tokens = getComputedStyle(document.documentElement);
+    const ACC = tokens.getPropertyValue('--accent-rgb').trim().split(/\s+/).join(',');
+    const PRI = tokens.getPropertyValue('--primary-rgb').trim().split(/\s+/).join(',');
 
     let mouseX = 0, mouseY = 0;
     let prevX  = 0, prevY  = 0;
@@ -85,8 +90,8 @@
             clearTimeout(snapTimer);
             gsap.to(ring, {
                 scaleX: 0.5, scaleY: 0.5, rotation: 0,
-                background:  'rgba(212,130,42,0.32)',
-                borderColor: 'rgba(212,130,42,0.65)',
+                background:  `rgba(${ACC},0.32)`,
+                borderColor: `rgba(${ACC},0.65)`,
                 duration: 0.28, ease: 'power2.out', overwrite: true
             });
         });
@@ -101,8 +106,8 @@
             gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)', overwrite: true });
             gsap.to(ring, {
                 scaleX: 1, scaleY: 1,
-                background:  'rgba(212,130,42,0.07)',
-                borderColor: 'rgba(212,130,42,0.25)',
+                background:  `rgba(${ACC},0.07)`,
+                borderColor: `rgba(${ACC},0.25)`,
                 duration: 0.35, ease: 'power2.out', overwrite: true
             });
         });
@@ -117,7 +122,7 @@
             gsap.to(dot,  { autoAlpha: 0, duration: 0.18, overwrite: true });
             gsap.to(ring, {
                 scaleX: 1.82, scaleY: 1.82, rotation: 0,
-                background:  'rgba(27,73,101,0.9)',
+                background:  `rgba(${PRI},0.9)`,
                 borderColor: 'transparent',
                 duration: 0.4, ease: 'power2.out', overwrite: true
             });
@@ -128,10 +133,13 @@
             gsap.to(dot,  { autoAlpha: 1, duration: 0.18, overwrite: true });
             gsap.to(ring, {
                 scaleX: 1, scaleY: 1,
-                background:  'rgba(212,130,42,0.07)',
-                borderColor: 'rgba(212,130,42,0.25)',
+                background:  `rgba(${ACC},0.07)`,
+                borderColor: `rgba(${ACC},0.25)`,
                 duration: 0.35, ease: 'power2.out', overwrite: true
             });
         });
     });
+
+    // Everything is wired — only now is the native cursor hidden (see html.has-custom-cursor in styles.css)
+    document.documentElement.classList.add('has-custom-cursor');
 })();
