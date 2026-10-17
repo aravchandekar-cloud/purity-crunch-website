@@ -11,10 +11,9 @@
     const cursorText = document.getElementById('cursor-text');
     if (!dot || !ring || !window.gsap) return;
 
-    // Colours come from the CSS tokens (--accent-rgb / --primary-rgb), not hard-coded literals
+    // Colours come from the CSS token --accent-rgb, not hard-coded literals
     const tokens = getComputedStyle(document.documentElement);
     const ACC = tokens.getPropertyValue('--accent-rgb').trim().split(/\s+/).join(',');
-    const PRI = tokens.getPropertyValue('--primary-rgb').trim().split(/\s+/).join(',');
 
     let mouseX = 0, mouseY = 0;
     let prevX  = 0, prevY  = 0;
@@ -122,7 +121,7 @@
             gsap.to(dot,  { autoAlpha: 0, duration: 0.18, overwrite: true });
             gsap.to(ring, {
                 scaleX: 1.82, scaleY: 1.82, rotation: 0,
-                background:  `rgba(${PRI},0.9)`,
+                background:  `rgba(${ACC},0.95)`,   // amber fill — #cursor-text is ink (see styles.css)
                 borderColor: 'transparent',
                 duration: 0.4, ease: 'power2.out', overwrite: true
             });

@@ -81,12 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.classList.add('open');
             document.body.style.overflow = 'hidden';
             window.lenisInstance?.stop();
+            // opacity only (not autoAlpha): the .open class owns visibility, so #modal-close is focusable right away
             if (window.gsap) {
-                gsap.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
+                gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" });
                 if (modalBox) {
                     gsap.fromTo(modalBox,
-                        { y: 28, scale: 0.95, autoAlpha: 0 },
-                        { y: 0, scale: 1, autoAlpha: 1, duration: 0.4, ease: "back.out(1.4)", delay: 0.05 }
+                        { y: 28, scale: 0.95, opacity: 0 },
+                        { y: 0, scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.4)", delay: 0.05 }
                     );
                 }
             }
@@ -102,10 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (modalBox) {
-                gsap.to(modalBox, { y: 18, scale: 0.97, autoAlpha: 0, duration: 0.25, ease: "power2.in" });
+                gsap.to(modalBox, { y: 18, scale: 0.97, opacity: 0, duration: 0.25, ease: "power2.in" });
             }
             gsap.to(overlay, {
-                autoAlpha: 0, duration: 0.28, delay: 0.08, ease: "power2.in",
+                opacity: 0, duration: 0.28, delay: 0.08, ease: "power2.in",
                 onComplete: () => { overlay.classList.remove('open'); document.body.style.overflow = ''; }
             });
         };

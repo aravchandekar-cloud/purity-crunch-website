@@ -12,6 +12,36 @@ if (!window.gsap || !window.ScrollTrigger) {
 gsap.registerPlugin(ScrollTrigger);
 gsap.defaults({ ease: 'power3.out' });
 
+// Exact CSS cubic-bezier() as a GSAP ease function (core GSAP only ships named eases)
+function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const sx = (t) => ((ax * t + bx) * t + cx) * t;
+    const sy = (t) => ((ay * t + by) * t + cy) * t;
+    const dx = (t) => (3 * ax * t + 2 * bx) * t + cx;
+    return (x) => {
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
+        let t = x;
+        for (let i = 0; i < 8; i++) {                      // Newton–Raphson
+            const e = sx(t) - x;
+            if (Math.abs(e) < 1e-6) return sy(t);
+            const d = dx(t);
+            if (Math.abs(d) < 1e-6) break;
+            t -= e / d;
+        }
+        let lo = 0, hi = 1; t = x;                         // bisection fallback
+        for (let i = 0; i < 30; i++) {
+            const e = sx(t);
+            if (Math.abs(e - x) < 1e-6) break;
+            if (e < x) lo = t; else hi = t;
+            t = (lo + hi) / 2;
+        }
+        return sy(t);
+    };
+}
+const EXPO = bezier(0.16, 1, 0.3, 1);   // the entrance curve — same as --ease-expo in the CSS
+
 // H1 .word-reveal → .char split. Runs in every mode so the markup (and its a11y label) always exists;
 // the hidden starting states below are only applied when motion is allowed.
 function splitHeadline() {
@@ -45,11 +75,12 @@ mm.add(
     // Set hero-content as 3D stage
     gsap.set('.hero-content', { transformStyle: 'preserve-3d', transformPerspective: 1200 });
 
-    // Initial states
-    gsap.set('.hero .badge',        { x: -36, autoAlpha: 0 });
-    gsap.set('.hero p',             { y: 22,  autoAlpha: 0 });
-    gsap.set('.hero-buttons .btn',  { y: 20,  autoAlpha: 0 });
+    // Starting states — same as the CSS hidden states, so nothing jumps when GSAP takes over
+    gsap.set('.hero .badge',        { y: 16, autoAlpha: 0 });
+    gsap.set('.hero-side p',        { y: 16, autoAlpha: 0 });
+    gsap.set('.hero-buttons .btn',  { y: 20, autoAlpha: 0 });
     gsap.set('.scroll-indicator',   { autoAlpha: 0 });
+    gsap.set('.hero-wordmark .ch',  { x: 0, y: 0, yPercent: 100, opacity: 0 });   // x/y pinned: GSAP would otherwise read the CSS translateY(100%) as a px offset
 
     // Char starting states (the split itself already ran above)
     document.querySelectorAll('.word-reveal').forEach(span => {
@@ -68,24 +99,24 @@ mm.add(
         });
     }
 
-    // Hero entrance timeline
-    const heroTl = gsap.timeline({ delay: hasMotion ? 0.1 : 0 });
+    // Hero reveal timeline — t0 = the intro's wipe start (or page-ready when the intro is skipped), see js/intro.js.
+    // Offsets (s): wordmark line 1 @0, line 2 @.24 · badge @.15 · H1 chars @.2 · paragraph @.4 · CTAs @.5 · cue @.9
+    // (the 3D chips fade in at t0+.3 over 1.2 s — three-scene.js listens to the same signal)
+    const wmLine = (n) => `.hero-wordmark .wm-line:nth-child(${n}) .ch`;
+    const heroTl = gsap.timeline({ paused: true });
     heroTl
-        .to('.hero .badge', { x: 0, autoAlpha: 1, duration: hasMotion ? 0.72 : 0, ease: 'back.out(1.7)', immediateRender: false })
+        .to(wmLine(1), { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.052, ease: EXPO }, 0)
+        .to(wmLine(2), { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.052, ease: EXPO }, 0.24)
+        .to('.hero .badge', { y: 0, autoAlpha: 1, duration: 0.6, ease: EXPO }, 0.15)
         .to('.word-reveal .char:not(.char-space)', {
-            clipPath: 'inset(0 0% 0 0)', autoAlpha: 1,
-            duration: hasMotion ? 0.55 : 0,
-            stagger: hasMotion ? 0.022 : 0,
-            ease: 'power3.out', immediateRender: false
-        }, '-=0.35')
-        .to('.hero p',             { y: 0, autoAlpha: 1, duration: hasMotion ? 0.62 : 0, ease: 'power3.out', immediateRender: false }, '-=0.42')
-        .to('.hero-buttons .btn',  { y: 0, autoAlpha: 1, duration: hasMotion ? 0.5 : 0, stagger: hasMotion ? 0.13 : 0, ease: 'power3.out', immediateRender: false }, '-=0.32')
-        .to('.scroll-indicator',   { autoAlpha: 1, duration: hasMotion ? 0.5 : 0 }, '-=0.2');
-
-    // Scroll indicator bounce loop
-    if (hasMotion) {
-        gsap.to('.scroll-indicator', { y: 9, duration: 1.1, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2.5 });
-    }
+            clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: 0.55, stagger: 0.022, ease: EXPO
+        }, 0.2)
+        .to('.hero-side p', { y: 0, autoAlpha: 1, duration: 0.52, ease: EXPO }, 0.4)
+        .to('.hero-buttons .btn', { y: 0, autoAlpha: 1, duration: 0.5, stagger: 0.13, ease: EXPO }, 0.5)
+        .to('.scroll-indicator', { autoAlpha: 1, duration: 0.5, ease: EXPO }, 0.9)
+        // cue loop starts once the cue has arrived
+        .add(() => gsap.to('.scroll-indicator', { y: 9, duration: 1.1, ease: 'sine.inOut', yoyo: true, repeat: -1 }), 1.5);
+    (window.__heroStart || Promise.resolve()).then(() => heroTl.play(0));
 
     // Hero 3D scene tilt on mousemove (paused during scroll)
     const isScrolling = () => window.lenisInstance && window.lenisInstance.isScrolling;

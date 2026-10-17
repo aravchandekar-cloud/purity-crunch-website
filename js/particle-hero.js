@@ -8,10 +8,14 @@
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
+    // cream / amber only — channels come from the CSS tokens (--accent-rgb, --cream-rgb)
+    const tokens = getComputedStyle(document.documentElement);
+    const ch = (name) => tokens.getPropertyValue(name).trim().split(/\s+/).join(',');
+    const ACC = ch('--accent-rgb'), CREAM = ch('--cream-rgb');
     const COLORS = [
-        'rgba(212, 130, 42, 0.55)', 'rgba(212, 130, 42, 0.28)',
-        'rgba(255, 255, 255, 0.18)', 'rgba(255, 255, 255, 0.10)',
-        'rgba(27, 73, 101, 0.35)',
+        `rgba(${ACC}, 0.55)`, `rgba(${ACC}, 0.28)`,
+        `rgba(${CREAM}, 0.20)`, `rgba(${CREAM}, 0.10)`,
+        `rgba(${ACC}, 0.16)`,
     ];
     const COUNT = 80;
     let W, H, particles = [], mx = -999, my = -999, active = true, rafId = null;
