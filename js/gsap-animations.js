@@ -228,6 +228,46 @@ mm.add(
         });
     });
 
+    // ── 5b. "Liquid" hover on the product images (3.10) ────────────────
+    // An inline SVG filter (fractal noise + displacement) is applied to an image ONLY while it is hovered; on leave it settles
+    // back with a springy ease and is then removed, so nothing idles on the GPU. One filter clone per image, so a quick move
+    // from one card to the next never shares (or strands) state. Fine pointer, >768px, motion allowed (this whole context).
+    // While a transition runs (~0.5 s each way) the chip scene behind the section pauses its render (window.__sceneHold, read by
+    // three-scene.js): at <= .15 opacity nobody sees it, and on a weak integrated GPU the two together dropped the transition
+    // to ~30 fps. The scene resumes the moment the transition ends.
+    const liquidTpl = document.getElementById('liquid-filter');
+    if (liquidTpl && isDesktop && window.matchMedia('(pointer: fine)').matches) {
+        let holders = 0;
+        document.querySelectorAll('.product-image').forEach((box, i) => {
+            const img = box.querySelector('img');
+            if (!img) return;
+            const f = liquidTpl.cloneNode(true);
+            f.id = `liquid-${i}`;
+            liquidTpl.parentNode.appendChild(f);
+            const noise = f.querySelector('feTurbulence'), map = f.querySelector('feDisplacementMap');
+            const s = { scale: 1, freq: 0.009 };
+            const apply = () => { map.setAttribute('scale', s.scale.toFixed(2)); noise.setAttribute('baseFrequency', s.freq.toFixed(5)); };
+            let held = false;
+            const hold = (on) => {   // per image, so an overwritten tween can never leave the scene paused
+                if (on === held) return;
+                held = on; holders += on ? 1 : -1;
+                window.__sceneHold = holders > 0;
+            };
+            box.addEventListener('mouseenter', () => {
+                img.style.filter = `url(#liquid-${i})`;
+                hold(true);
+                gsap.to(s, { scale: 28, freq: 0.022, duration: D[3], ease: E.expo, overwrite: true, onUpdate: apply, onComplete: () => hold(false) });
+            });
+            box.addEventListener('mouseleave', () => {
+                hold(true);
+                gsap.to(s, {
+                    scale: 1, freq: 0.009, duration: 0.52, ease: 'elastic.out(1, 0.45)', overwrite: true, onUpdate: apply,
+                    onComplete: () => { img.style.filter = ''; hold(false); }
+                });
+            });
+        });
+    }
+
     // ── 6. VIDEOS SECTION ────────────────────────────────────────────
     enter('.video-card', { y: 50 });
 

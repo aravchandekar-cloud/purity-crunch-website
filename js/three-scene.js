@@ -314,6 +314,7 @@ function init() {
         camera.position.y += (state.camY - mouse.y * 0.8 - camera.position.y) * 0.04;
         camera.lookAt(0, state.camY * 0.5, 0);
 
+        if (window.__sceneHold) return;   // a heavier effect (the product images' liquid hover, js/gsap-animations.js) has the GPU for ~0.5 s
         renderer.render(scene, camera);
     }
 

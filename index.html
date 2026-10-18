@@ -908,6 +908,15 @@
         </div>
     </footer>
 
+    <!-- Template for the product images' "liquid" hover (js/gsap-animations.js clones it once per image and applies it only
+         while an image is hovered; pointer:fine, >768px, motion allowed). Zero-size, never displayed. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <filter id="liquid-filter" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.009" numOctaves="2" seed="7" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </svg>
+
     <script defer src="js/main.js"></script>
     <script defer src="js/smooth-scroll.js"></script>
     <script defer src="js/cursor.js"></script>
