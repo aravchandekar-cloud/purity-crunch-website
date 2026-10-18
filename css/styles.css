@@ -224,10 +224,6 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, header[tabindex="-1"]:f
 /* ===== KEYFRAMES ===== */
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-@keyframes shimmer {
-    from { transform: translateX(-220%); }
-    to   { transform: translateX(220%); }
-}
 @keyframes pulse-glow {
     0%   { box-shadow: 0 0 0 0   rgb(var(--accent-rgb) / 0.45), var(--shadow-orange); }
     70%  { box-shadow: 0 0 0 18px rgb(var(--accent-rgb) / 0),   var(--shadow-orange); }
@@ -671,6 +667,11 @@ html.anim-failed :is(
     grid-template-columns: repeat(2, 1fr);
     gap: 32px;
 }
+/* The 2nd and 4th card sit lower (editorial stagger) — only where the rail really is two columns (one column at <=768px) */
+@media (min-width: 769px) {
+    .product-rail { align-items: start; }
+    .product-rail > .dbl-shell:nth-child(even) { margin-top: clamp(3rem, 6vw, 6rem); }
+}
 
 .product-card {
     background: var(--surface);
@@ -678,10 +679,9 @@ html.anim-failed :is(
     overflow: hidden;
     box-shadow: none;
     border: none;
-    transition: transform 0.7s cubic-bezier(0.32, 0.72, 0, 1);
     position: relative;
+    /* no transform transition: GSAP owns this element's transform (tilt + the 3px hover lift, js/gsap-animations.js) */
 }
-.product-card:hover { transform: translateY(-3px); }
 
 .product-image {
     position: relative;
@@ -692,22 +692,9 @@ html.anim-failed :is(
 .product-image img {
     width: 100%; height: 100%;
     object-fit: cover;
-    transition: transform 0.75s var(--ease-expo);
+    transition: transform var(--dur-3) var(--ease-expo);
 }
-.product-card:hover .product-image img { transform: scale(1.07); }
-
-/* Shimmer sweep on hover */
-.product-image::after {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 55%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.26), transparent);
-    transform: translateX(-220%);
-    pointer-events: none;
-    z-index: 2;
-}
-.product-card:hover .product-image::after { animation: shimmer 0.8s var(--ease-expo) 0.08s; }
+.product-card:hover .product-image img { transform: scale(1.05); }
 
 .product-tags { position: absolute; top: 16px; left: 16px; z-index: 3; display: flex; gap: 8px; }
 .tag {
@@ -749,7 +736,8 @@ html.anim-failed :is(
 .quick-view-btn:hover { background: var(--primary); }
 
 .product-info { padding: 28px; }
-.product-info h3 { font-size: 1.55rem; margin-bottom: 10px; }
+.product-info h3 { font-size: 1.55rem; margin-bottom: 10px; transition: color var(--dur-2) var(--ease-premium); }
+.product-card:hover .product-info h3 { color: var(--accent); }
 .product-info p { color: var(--text-muted); margin-bottom: 16px; font-size: 0.95rem; line-height: 1.6; }
 .product-info hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 .packaging-options strong {
@@ -1050,7 +1038,8 @@ html.anim-failed :is(
        at ScrollTrigger refresh, and the list never appears */
     transition: background-color 0.35s var(--ease-premium), border-color 0.35s var(--ease-premium), box-shadow 0.35s var(--ease-premium);
 }
-.feature-list li:hover { background: var(--surface-2); transform: translateX(6px); box-shadow: var(--shadow-sm); border-color: var(--accent); }
+/* (no hover translateX: each item's entrance leaves GSAP's inline transform on it, which would override a CSS one) */
+.feature-list li:hover { box-shadow: var(--shadow-sm); border-color: var(--accent); }
 .feature-list i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 22px; }
 
 .cta-wrap {
@@ -1100,15 +1089,15 @@ html.anim-failed :is(
     border-radius: calc(2rem - 6px);
     border: none;
     box-shadow: var(--shadow-sm);
-    transition: transform 0.7s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: box-shadow var(--dur-3) var(--ease-premium);   /* no transform: GSAP owns this element's entrance */
 }
-.process-step:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.process-step:hover { box-shadow: var(--shadow-md); }
 .process-step-number {
     position: absolute;
     top: 10px; left: 14px;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-display);
     font-size: 4.5rem;
-    font-weight: 800;
+    font-weight: 400;
     color: var(--cream);
     opacity: 0.08;
     line-height: 1;
@@ -1136,7 +1125,7 @@ html.anim-failed :is(
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s var(--ease-expo);
+    transition: transform var(--dur-3) var(--ease-expo);
 }
 .process-step:hover .process-step-img img { transform: scale(1.06); }
 .process-step h3 {
@@ -1816,13 +1805,13 @@ footer > * {
     padding: 6px;
     display: flex;
     flex-direction: column;
-    transition: border-color 0.7s cubic-bezier(0.32,0.72,0,1),
-                box-shadow   0.7s cubic-bezier(0.32,0.72,0,1);
+    transition: border-color var(--dur-3) var(--ease-premium),
+                box-shadow   var(--dur-3) var(--ease-premium);
 }
 .dbl-shell > .dbl-core { flex: 1; }
 .dbl-shell:hover {
     border-color: var(--border-strong);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 24px 80px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 24px 80px rgba(0,0,0,0.4), 0 0 56px rgb(var(--accent-rgb) / 0.10);   /* faint amber glow */
 }
 .dbl-core {
     background: var(--surface);
