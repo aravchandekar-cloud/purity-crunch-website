@@ -768,7 +768,8 @@ html.anim-failed :is(
     transition: var(--transition);
 }
 .size-pill:hover { border-color: var(--accent); color: var(--accent); }
-.size-pill.bulk { background: var(--accent); color: var(--bg-color); border-color: var(--accent); }
+.size-pill.bulk { background: var(--accent); color: var(--bg-color); border-color: var(--accent); font-weight: 600; }
+.size-pill.bulk:hover { color: var(--bg-color); filter: brightness(1.1); }
 
 /* ===== PRODUCT MODAL ===== */
 .product-modal-overlay {
