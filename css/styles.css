@@ -404,16 +404,20 @@ html.intro:not(.fonts-ready) #intro > * { visibility: hidden; }   /* never show 
     html.js:not(.anim-failed) .scroll-indicator { opacity: 0; }
     html.js:not(.anim-failed) .word-reveal { clip-path: inset(0 100% 0 0); opacity: 0; }
     html.js:not(.anim-failed) .hero-wordmark .ch { opacity: 0; transform: translateY(100%); }
+    /* below the hero: the trust cards can sit inside a tall first viewport, and the H2 masks / underlines must not flash visible */
+    html.js:not(.anim-failed) .trust-card { opacity: 0; }
+    html.js:not(.anim-failed) .h2-line { transform: translateY(110%); }
+    html.js:not(.anim-failed) .heading-underline { transform: scaleX(0); }
 }
 /* The wordmark must never paint in the fallback face: wait for Anton (js/intro.js adds html.fonts-ready, 1.5 s cap) */
 html.js:not(.fonts-ready):not(.anim-failed) .hero-wordmark { visibility: hidden; }
 /* Failsafe for states GSAP writes inline (gsap.from / gsap.set) — keep in sync with gsap-animations.js */
 html.anim-failed :is(
     .hero .badge, .hero-side p, .hero-buttons .btn, .scroll-indicator, .word-reveal, .word-reveal .char,
-    .hero-wordmark .ch, .trust-card, .section-header, .faq-list, .faq-item, .product-card, .video-card,
-    .image-frame-outer, .location-bubble, .heritage-section .split-content > *, .feature-list li,
-    .process-step, .process-step-icon, .testimonial-card, .export-section .split-content > *,
-    .form-group, .export-image-wrap, .export-ready-badge, .footer-top > *
+    .hero-wordmark .ch, .trust-card, .section-header :is(.eyebrow-tag, .section-desc), .h2-line, .heading-underline,
+    .dbl-shell, .video-card, .image-frame-outer, .location-bubble, .heritage-section .split-content > *,
+    .feature-list li, .process-step, .process-step-icon, .testimonial-card, .faq-item,
+    .export-section .split-content > *, .export-image-wrap, .export-ready-badge, .footer-top > *
 ) { opacity: 1 !important; visibility: visible !important; transform: none !important; clip-path: none !important; }
 
 /* Lighting: amber glow rising from the base, navy glow top-right, edge vignette */
@@ -559,9 +563,9 @@ html.anim-failed :is(
     border-radius: var(--radius-md);
     background: var(--surface);
     border: 1px solid var(--border);
-    transition: transform 0.4s var(--ease-expo), box-shadow 0.4s var(--ease-expo), border-color 0.3s ease;
+    /* no transform / opacity transition: GSAP animates this element's entrance, and a CSS transition on it corrupts the
+       end values at ScrollTrigger.refresh(). The hover flip lives on .trust-card-inner. */
 }
-.trust-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
 .trust-icon {
     width: 72px; height: 72px;
     margin: 0 auto 22px;
@@ -587,13 +591,17 @@ html.anim-failed :is(
 .trust-card:hover .trust-icon { background: var(--primary); color: var(--cream); }
 .trust-counter {
     display: block;
-    font-family: 'Outfit', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 2.4vw, 2.5rem);   /* Anton is condensed: even "50+ Buyers" stays on one line in the narrowest card (≈183px of content at 1024) */
+    font-weight: 400;                            /* one weight — no faux bold */
+    letter-spacing: 0.01em;
+    white-space: nowrap;
     color: var(--cream);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    transition: color var(--dur-2) var(--ease-premium);
 }
+.trust-card:hover .trust-counter { color: var(--accent); }
 .trust-card h3 {
     font-family: 'Outfit', sans-serif;
     font-size: 1rem;
@@ -646,7 +654,7 @@ html.anim-failed :is(
 
 /* ===== SECTION HEADER ===== */
 .section-header { max-width: 700px; margin: 0 auto 64px; }
-.section-header h2 { font-size: 3rem; margin-bottom: 20px; line-height: 1.15; }
+.section-header h2 { margin-bottom: 20px; }   /* type: see h2.h2-display (the six short headings) */
 
 /* Animated gold underline */
 .section-heading-line {
@@ -1544,12 +1552,11 @@ input[type="tel"]:not(:placeholder-shown):invalid {
 /* ── Section heading underline (GSAP-animated, replaces ::after pseudo) ── */
 .heading-underline {
     display: block;
+    width: 72px;   /* drawn by scaleX (js/gsap-animations.js). It used to be width:0 with a width tween "from 0", so it never showed */
     height: 3px;
     background: linear-gradient(90deg, var(--accent), var(--accent-hi));
     border-radius: 2px;
-    margin: 8px auto 0;
-    width: 0;
-    transform-origin: left;
+    margin: 12px auto 0;
 }
 
 /* ── Product card 3D tilt ── */
@@ -1886,25 +1893,26 @@ footer > * {
     flex-shrink: 0;
 }
 
-/* ── Scroll reveal (IntersectionObserver) ── */
-.reveal {
-    transition:
-        opacity   0.85s cubic-bezier(0.32,0.72,0,1),
-        transform 0.85s cubic-bezier(0.32,0.72,0,1),
-        filter    0.65s cubic-bezier(0.32,0.72,0,1);
+/* ── Display H2 (3.1) — the six short section headings.
+   Anton ships one weight: font-weight 400, or the browser fakes a bold. .h2-mask clips the rising text
+   (js/gsap-animations.js: yPercent 110 → 0); its padding keeps the caps' edges unclipped at rest. ── */
+h2.h2-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-h2);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--cream);
 }
-/* hidden until main.js adds .is-visible — only with JS, only with motion, never after anim-failed */
-@media (prefers-reduced-motion: no-preference) {
-    html.js:not(.anim-failed) .reveal:not(.is-visible) {
-        opacity: 0;
-        transform: translateY(52px);
-        filter: blur(6px);
-    }
-}
-.reveal-d1 { transition-delay: 0.08s; }
-.reveal-d2 { transition-delay: 0.16s; }
-.reveal-d3 { transition-delay: 0.24s; }
-.reveal-d4 { transition-delay: 0.32s; }
+.h2-mask { display: block; overflow: hidden; padding: 0.06em 0 0.12em; margin: -0.06em 0 -0.12em; }
+.h2-line { display: inline-block; }
+
+/* ── Scroll reveal hook ──
+   main.js's IntersectionObserver still adds .is-visible to .reveal (code and specs read it), but it no longer drives a
+   visual: each product card now enters once, from js/gsap-animations.js (MOTION tokens). Before, .reveal (opacity /
+   transform / blur transitions) and a GSAP tween both animated the cards, and the CSS transition list replaced the
+   shells' hover transitions. */
 
 /* ── Macro whitespace boost ── */
 .section-header { margin-bottom: 80px; }
