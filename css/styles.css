@@ -1150,9 +1150,10 @@ html.anim-failed :is(
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     overflow: hidden;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color var(--dur-2) var(--ease-premium), box-shadow var(--dur-2) var(--ease-premium);   /* no transform/opacity: GSAP owns the entrance */
 }
-.faq-item.open { border-color: var(--accent); box-shadow: 0 4px 18px rgb(var(--accent-rgb) / 0.10); }
+/* open = the amber left rule (on the question + the answer) and the amber question; the outline stays neutral */
+.faq-item.open { border-color: var(--border-strong); box-shadow: 0 4px 24px rgb(var(--accent-rgb) / 0.08); }
 .faq-question {
     width: 100%;
     background: none;
@@ -1169,11 +1170,11 @@ html.anim-failed :is(
     font-size: 1rem;
     color: var(--cream);
     border-left: 3px solid transparent;
-    transition: border-color 0.3s ease, color 0.3s ease;
+    transition: border-color var(--dur-2) var(--ease-premium), color var(--dur-2) var(--ease-premium);
 }
 .faq-question:focus-visible { outline-offset: -3px; }   /* .faq-item clips overflow */
 .faq-item.open .faq-question { border-left-color: var(--accent); color: var(--accent); }
-.faq-chevron { flex-shrink: 0; font-size: 20px; color: var(--text-muted); transition: transform 0.35s var(--ease-expo), color 0.3s ease; }
+.faq-chevron { flex-shrink: 0; font-size: 20px; color: var(--text-muted); transition: transform var(--dur-2) var(--ease-expo), color var(--dur-2) var(--ease-premium); }
 .faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent); }
 .faq-answer { overflow: hidden; }
 html.js .faq-answer { height: 0; }   /* collapsed only when JS is there to open it */
@@ -1431,29 +1432,31 @@ input[type="tel"]:not(:placeholder-shown):invalid {
 .testimonial-card {
     background: var(--surface);
     border-radius: calc(2rem - 6px);
-    padding: 36px;
-    border: none;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.7s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+    padding: 40px 36px 36px;
+    border: 1px solid var(--border);   /* hairline */
+    box-shadow: 0 24px 64px rgba(0,0,0,0.30);
+    /* colours/shadow only: GSAP owns this element's entrance and tilt, and a CSS transform transition on it corrupts the
+       end values at ScrollTrigger.refresh() */
+    transition: border-color var(--dur-3) var(--ease-premium), box-shadow var(--dur-3) var(--ease-premium);
     display: flex;
     flex-direction: column;
 }
 .testimonial-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-hover);
+    border-color: var(--border-strong);
+    box-shadow: 0 32px 96px rgba(0,0,0,0.50), 0 0 64px rgb(var(--accent-rgb) / 0.08);
 }
 .testimonial-stars {
     color: var(--accent);
-    margin-bottom: 16px;
-    font-size: 18px;
+    margin-bottom: 20px;
+    font-size: 16px;
     display: flex;
-    gap: 2px;
+    gap: 3px;
 }
 .testimonial-quote {
-    font-size: 1rem;
-    line-height: 1.72;
-    color: var(--text-main);
-    margin-bottom: 24px;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--cream);
+    margin-bottom: 28px;
     font-style: italic;
     flex: 1;
     position: relative;
@@ -1479,7 +1482,7 @@ input[type="tel"]:not(:placeholder-shown):invalid {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    padding-top: 20px;
+    padding-top: 22px;
     border-top: 1px solid var(--border);
 }
 .testimonial-name {
@@ -1497,6 +1500,8 @@ input[type="tel"]:not(:placeholder-shown):invalid {
     font-size: 0.85rem;
     color: var(--accent);
     font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
 }
 
 /* Screen-reader only utility */
