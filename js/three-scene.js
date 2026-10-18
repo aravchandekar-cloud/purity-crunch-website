@@ -227,19 +227,19 @@ function init() {
     layoutAll();
 
     // ── Scroll choreography ────────────────────────────────────────────
-    // hero: the big cluster · every other section: an ambient field at <= .15 opacity, outer thirds
+    // hero: the big cluster · every other section: faded to 0 (the scene stops updating and rendering once it is invisible)
     const state = { spread: 1, ring: 0, hero: 1, opacity: 0.95, fade: 0, camY: 0 };
 
     const FORMATIONS = [
         { trigger: '.hero',                 spread: 1.0, ring: 0, hero: 1, opacity: 0.95 },
-        { trigger: '.trust-section',        spread: 1.2, ring: 0, hero: 0, opacity: 0.15 },
-        { trigger: '.products-section',     spread: 1.0, ring: 1, hero: 0, opacity: 0.15 },
-        { trigger: '.videos-section',       spread: 1.3, ring: 0, hero: 0, opacity: 0.12 },
-        { trigger: '.heritage-section',     spread: 1.4, ring: 0, hero: 0, opacity: 0.12 },
-        { trigger: '.process-section',      spread: 1.3, ring: 0, hero: 0, opacity: 0.12 },
-        { trigger: '.testimonials-section', spread: 1.5, ring: 0, hero: 0, opacity: 0.10 },
-        { trigger: '.faq-section',          spread: 1.5, ring: 0, hero: 0, opacity: 0.10 },
-        { trigger: '.export-section',       spread: 1.3, ring: 0, hero: 0, opacity: 0.12 }
+        { trigger: '.trust-section',        spread: 1.2, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.products-section',     spread: 1.0, ring: 1, hero: 0, opacity: 0 },
+        { trigger: '.videos-section',       spread: 1.3, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.heritage-section',     spread: 1.4, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.process-section',      spread: 1.3, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.testimonials-section', spread: 1.5, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.faq-section',          spread: 1.5, ring: 0, hero: 0, opacity: 0 },
+        { trigger: '.export-section',       spread: 1.3, ring: 0, hero: 0, opacity: 0 }
     ];
 
     FORMATIONS.forEach((f) => {
@@ -284,8 +284,12 @@ function init() {
 
     // Driven by gsap.ticker (same loop as Lenis raf) — one rAF, render runs in phase
     // with the scroll update instead of a competing second rAF loop.
+    let frame = 0;
+    const halfRate = window.innerWidth <= 768;   // phones: chips at 30 fps, the page's main thread keeps the rest
     function tick() {
         if (!running) return;
+        if (halfRate && (frame++ & 1)) return;
+        if (state.opacity * state.fade <= 0.004 && prevOpacity <= 0.004) return;   // invisible below the hero: skip update + render
         const t = clock.getElapsedTime();
         const h = state.hero;
 
