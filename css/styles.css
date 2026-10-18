@@ -216,6 +216,8 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, header[tabindex="-1"]:f
 }
 .form-message.success { display: block; background: rgba(52, 168, 83, 0.14); color: #8FE3A8; border: 1px solid rgba(143, 227, 168, 0.38); }
 .form-message.error { display: block; background: rgba(255, 107, 107, 0.12); color: #FFA79D; border: 1px solid rgba(255, 138, 128, 0.40); }
+/* success / error message entrance (the class is set by main.js; display none -> block starts the animation) */
+.form-message.success, .form-message.error { animation: msg-in var(--dur-2) var(--ease-expo) both; }
 .btn-spinner { animation: spin 0.8s linear infinite; }
 .btn[aria-busy="true"] { opacity: 0.75; cursor: not-allowed; pointer-events: none; }
 .nav-links a.active-nav { color: var(--cream) !important; }
@@ -223,6 +225,7 @@ main[tabindex="-1"]:focus, section[tabindex="-1"]:focus, header[tabindex="-1"]:f
 
 /* ===== KEYFRAMES ===== */
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes msg-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 
 @keyframes pulse-glow {
     0%   { box-shadow: 0 0 0 0   rgb(var(--accent-rgb) / 0.45), var(--shadow-orange); }
@@ -404,6 +407,7 @@ html.intro:not(.fonts-ready) #intro > * { visibility: hidden; }   /* never show 
     html.js:not(.anim-failed) .trust-card { opacity: 0; }
     html.js:not(.anim-failed) .h2-line { transform: translateY(110%); }
     html.js:not(.anim-failed) .heading-underline { transform: scaleX(0); }
+    html.js:not(.anim-failed) .fw-line { transform: translateY(100%); }
 }
 /* The wordmark must never paint in the fallback face: wait for Anton (js/intro.js adds html.fonts-ready, 1.5 s cap) */
 html.js:not(.fonts-ready):not(.anim-failed) .hero-wordmark { visibility: hidden; }
@@ -413,7 +417,7 @@ html.anim-failed :is(
     .hero-wordmark .ch, .trust-card, .section-header :is(.eyebrow-tag, .section-desc), .h2-line, .heading-underline,
     .dbl-shell, .video-card, .image-frame-outer, .location-bubble, .heritage-section .split-content > *,
     .feature-list li, .process-step, .process-step-icon, .testimonial-card, .faq-item,
-    .export-section .split-content > *, .export-image-wrap, .export-ready-badge, .footer-top > *
+    .export-section .split-content > *, .export-image-wrap, .export-ready-badge, .footer-top > *, .fw-line
 ) { opacity: 1 !important; visibility: visible !important; transform: none !important; clip-path: none !important; }
 
 /* Lighting: amber glow rising from the base, navy glow top-right, edge vignette */
@@ -1244,7 +1248,9 @@ details.faq-accordion summary:focus-visible { outline-offset: -3px; }   /* detai
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 65% 50%, rgb(var(--accent-rgb) / 0.07) 0%, transparent 60%);
+    background:
+        radial-gradient(ellipse at 65% 45%, rgb(var(--accent-rgb) / 0.11) 0%, transparent 60%),
+        radial-gradient(ellipse at 8% 95%, rgb(var(--accent-rgb) / 0.06) 0%, transparent 45%);   /* faint amber glow behind the image and under the form */
     pointer-events: none;
 }
 .export-section .split-content > p { color: var(--text-muted); margin-bottom: 6px; }
@@ -1267,7 +1273,7 @@ details.faq-accordion summary:focus-visible { outline-offset: -3px; }   /* detai
 }
 .form-container {
     background: var(--surface-2);
-    padding: 40px;
+    padding: clamp(1.25rem, 4vw, 2.5rem);   /* was a flat 40px: on a 375px phone that left the fields ~215px wide */
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     box-shadow: 0 0 0 1px var(--border), 0 28px 56px rgba(0,0,0,0.4);
@@ -1390,6 +1396,31 @@ details.faq-accordion summary:focus-visible { outline-offset: -3px; }   /* detai
 .legal-links { display: flex; gap: 24px; }
 .legal-links a { color: var(--text-muted); transition: color 0.2s ease; }
 .legal-links a:hover { color: var(--cream); }
+
+/* Decorative wordmark above the footer bar (3.9): the hero's two lines, cream at .06, full-bleed and cut off by the bottom
+   edge of its box (line 1 whole, the top of line 2). aria-hidden in the markup; the lines rise out of the box on entry. */
+.footer-wordmark {
+    width: 100vw;
+    margin: 0 0 32px calc(50% - 50vw);
+    height: calc(var(--fs-wordmark) * 1.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-wordmark);
+    line-height: 0.78;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgb(var(--cream-rgb) / 0.06);
+    user-select: none;
+    pointer-events: none;
+}
+/* The words are generated content (data-text), not DOM text: they are pure decoration at an intentionally ~1.2:1 contrast,
+   which axe would otherwise count as unreadable text. The container is aria-hidden as well. */
+.fw-line::before { content: attr(data-text); }
 
 /* ===== TRUST SIGNALS (Export Form) ===== */
 .trust-signals {

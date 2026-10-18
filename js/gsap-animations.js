@@ -334,6 +334,14 @@ mm.add(
 
     // ── 12. FOOTER ────────────────────────────────────────────────────
     enter('.footer-top > *', { y: 30, start: 'top 92%' });
+    // the decorative wordmark's two lines rise out of its clipped box (the same mask motion as the headings)
+    if (document.querySelector('.fw-line')) {
+        gsap.set('.fw-line', { x: 0, y: 0, yPercent: 100 });   // x/y pinned: GSAP would read the CSS translateY(100%) as px
+        gsap.to('.fw-line', {
+            yPercent: 0, duration: D[4], ease: E.expo, stagger: S.card,
+            scrollTrigger: { trigger: '.footer-wordmark', start: 'top 98%' }
+        });
+    }
 
     return () => { ScrollTrigger.getAll().forEach(t => t.kill()); };
   }
